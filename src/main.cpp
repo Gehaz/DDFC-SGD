@@ -27,6 +27,30 @@ int main(int argc, char* argv[]) {
     // perform linear regression 
     unsigned int d = 1, n = 100;
     double loss = 0.0;
+	
+	bool parallel = false;
+	float lr = 0.00005
+	unsigned int num_iters = 2000, num_batches = 10, num_threads = 4;
+	
+	// load user parameters
+	for (unsigned int i = 1; i < argc; i++) {
+		arg = argv[i]
+		if (strcmp(arg, "parallel") == 0)
+			parallel = true;
+		else if (strncmp(arg, "d=", strlen("d=")))
+			d = atoi(arg.substr(strlen("d=")))
+		else if (strncmp(arg, "n=", strlen("n=")))
+			n = atoi(arg.substr(strlen("n=")))
+		else if (strncmp(arg, "lr=", strlen("lr=")))
+			lr = atoi(arg.substr(strlen("lr=")))
+		else if (strncmp(arg, "iters=", strlen("iters=")))
+			num_iters = atoi(arg.substr(strlen("iters=")))
+		else if (strncmp(arg, "batches=", strlen("batches=")))
+			num_batches = atoi(arg.substr(strlen("batches=")))
+		else if (strncmp(arg, "threads=", strlen("threads=")))
+			num_threads = atoi(arg.substr(strlen("threads=")))
+	}
+	
     std::vector<double> weights(d+1);
     std::vector< std::vector<double> > X(n, std::vector<double>(d+1));
     std::vector<double> Y(n);
@@ -43,15 +67,14 @@ int main(int argc, char* argv[]) {
     std::cout << "]" << std::endl;
 
     // init optimizer and perform sgd
-    if (argc > 1 && strcmp(argv[1], "parallel") == 0) {
-        parallel_sgd optimizer(&linear_reg_obj, &linear_reg_obj_grad, weights, X, Y, 0.00005, 2000, 10, \
-                                argc > 2 ? atoi(argv[2]) : 4);
+    if (argc > 1 && parallel) {
+        parallel_sgd optimizer(&linear_reg_obj, &linear_reg_obj_grad, weights, X, Y, lr, num_iters, num_batches, num_threads);
         optimizer.update(100);
         weights = optimizer.get_weights();
         loss = optimizer.get_loss();
     }
     else { 
-        seq_sgd optimizer(&linear_reg_obj, &linear_reg_obj_grad, weights, X, Y, 0.00005, 2000, 10);
+        seq_sgd optimizer(&linear_reg_obj, &linear_reg_obj_grad, weights, X, Y, lr, num_iters, num_batches);
         optimizer.update(100);
         weights = optimizer.get_weights();
         loss = optimizer.get_loss();

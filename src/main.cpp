@@ -29,27 +29,28 @@ int main(int argc, char* argv[]) {
     double loss = 0.0;
 	
 	bool parallel = false;
-	float lr = 0.00005
+	float lr = 0.00005;
 	unsigned int num_iters = 2000, num_batches = 10, num_threads = 4;
 	
 	// load user parameters
-	for (unsigned int i = 1; i < argc; i++) {
-		arg = argv[i]
-		if (strcmp(arg, "parallel") == 0)
+	for (int i = 1; i < argc; i++) {
+		if (strcmp(argv[i], "parallel") == 0)
 			parallel = true;
-		else if (strncmp(arg, "d=", strlen("d=")))
-			d = atoi(arg.substr(strlen("d=")))
-		else if (strncmp(arg, "n=", strlen("n=")))
-			n = atoi(arg.substr(strlen("n=")))
-		else if (strncmp(arg, "lr=", strlen("lr=")))
-			lr = atoi(arg.substr(strlen("lr=")))
-		else if (strncmp(arg, "iters=", strlen("iters=")))
-			num_iters = atoi(arg.substr(strlen("iters=")))
-		else if (strncmp(arg, "batches=", strlen("batches=")))
-			num_batches = atoi(arg.substr(strlen("batches=")))
-		else if (strncmp(arg, "threads=", strlen("threads=")))
-			num_threads = atoi(arg.substr(strlen("threads=")))
+		else if (strcmp(argv[i], "--d") == 0)
+			d = atoi(argv[i+1]);
+		else if (strcmp(argv[i], "--n") == 0)
+			n = atoi(argv[i+1]);
+		else if (strcmp(argv[i], "--lr") == 0)
+			lr = atoi(argv[i+1]);
+		else if (strcmp(argv[i], "--iters") == 0)
+			num_iters = atoi(argv[i+1]);
+		else if (strcmp(argv[i], "--batches") == 0)
+			num_batches = atoi(argv[i+1]);
+		else if (strcmp(argv[i], "--threads") == 0)
+			num_threads = atoi(argv[i+1]);
 	}
+    printf("d=%d, n=%d, lr=%f, iters=%d, batches=%d, threads=%d\n", d, n, lr, num_iters, num_batches, num_threads);
+    printf("parallel run: %i\n", parallel);
 	
     std::vector<double> weights(d+1);
     std::vector< std::vector<double> > X(n, std::vector<double>(d+1));
@@ -57,17 +58,20 @@ int main(int argc, char* argv[]) {
 
     // toy data
     gen_toy_data(X, Y);
-    std::cout << "X = [ ";
-    for (unsigned int i = 0; i < n; i++)
-        std::cout << X[i][0] << " ";
-    std::cout << "]" << std::endl;
-    std::cout << "Y = [ ";
-    for (auto& e : Y)
-        std::cout << e << " ";
-    std::cout << "]" << std::endl;
+    if (false)
+    {
+        std::cout << "X = [ ";
+        for (unsigned int i = 0; i < n; i++)
+            std::cout << X[i][0] << " ";
+        std::cout << "]" << std::endl;
+        std::cout << "Y = [ ";
+        for (auto& e : Y)
+            std::cout << e << " ";
+        std::cout << "]" << std::endl;
+    }
 
     // init optimizer and perform sgd
-    if (argc > 1 && parallel) {
+    if (parallel) {
         parallel_sgd optimizer(&linear_reg_obj, &linear_reg_obj_grad, weights, X, Y, lr, num_iters, num_batches, num_threads);
         optimizer.update(100);
         weights = optimizer.get_weights();

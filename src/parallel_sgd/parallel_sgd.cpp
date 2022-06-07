@@ -56,7 +56,7 @@ void parallel_sgd::update(const unsigned int print_every) {
 
             // verbose info
             // if (print_every > 0 && i % print_every == 0) {
-            //     std::cout << "Thread " << omp_get_thread_num() << ", Iteration " << i \
+            //     std::cout << "Thread " << omp_get_thread_num() << ", Iteration " << i
             //         << ", loss: " << get_loss() << std::endl;
             // }
         }

@@ -2,6 +2,7 @@
 #include <random>
 #include <string.h>
 #include <cstdlib>
+#include <time.h>
 #include "seq_sgd/seq_sgd.hpp"
 #include "parallel_sgd/parallel_sgd.hpp"
 #include "obj_function.hpp"
@@ -11,13 +12,35 @@
 // x_i = i, y_i = 2x_i-1 + eps, eps ~ N(0,0.5)
 void gen_toy_data(std::vector< std::vector<double> >& X, std::vector<double>& Y) {
     unsigned int n = X.size(), d = X[0].size()-1;
+    double y_calc = 0;
+    // random generation of the target function
+    // y_i = coeff[0]*x[0] + .... + coeff[d]*x[d] + eps
+    std::vector<unsigned int> coeff(d+1);
+    srand(time(NULL));
+    for (unsigned int j = 0; j <= d; j++) {
+        coeff[j] = rand() % 20;
+        printf("%d, ", coeff[j]);
+    }
+    printf("\n");
+    
     std::random_device rd; 
     std::mt19937 gen(rd());
     std::normal_distribution<double> dist(0.0,0.5);
-    for (unsigned int i = 0; i < n; i++) { 
-        X[i][d-1] = i+1; 
+    double normalization_factor = 0.001;
+    for (unsigned int i = 0; i < n; i++) {
+        // randomly generate the sample points
+        y_calc = 0;
+        for (unsigned int j = 0; j <= d; j++) {
+            X[i][j] = (rand() % 1000) * normalization_factor;
+            y_calc = y_calc + coeff[j]*X[i][j];
+        }
+        Y[i] = y_calc + dist(gen)*normalization_factor;
+
+        /* old code. generating sample for d=1 only
+        X[i][d-1] = (i+1)*normalization_factor; 
         X[i][d] = 1; // intercept
-        Y[i] = 2*(i+1)-1 + dist(gen);
+        Y[i] = (2*(i+1)-1 + dist(gen))*normalization_factor;
+        */
     }
 }
     
